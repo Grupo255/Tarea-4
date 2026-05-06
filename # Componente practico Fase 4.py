@@ -81,3 +81,16 @@ class Cliente(Entidad):
     # Implementación del método abstracto
     def mostrar_info(self):
         return f"{self._id} - {self._nombre} - {self._correo}"
+
+# Clase abstracta Servicio
+class Servicio(ABC):
+
+    # Constructor del servicio
+    def __init__(self, nombre, precio_base):
+        self.nombre = nombre  # Nombre del servicio
+        self.precio_base = precio_base  # Precio base
+
+    # Método abstracto para calcular costo
+    @abstractmethod
+    def calcular_costo(self, *args):
+        pass
