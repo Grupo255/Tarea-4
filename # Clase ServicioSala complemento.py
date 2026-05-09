@@ -20,5 +20,5 @@ class ServicioAsesoria(Servicio):
 
     # Calcula costo por horas con recargo del 20%
     def calcular_costo(self, horas=1):
-        return self.precio_base * horas * 1.2
-    # Mrly C
+        return self.precio_base * horas *1.2
+    
