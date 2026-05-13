@@ -1,96 +1,111 @@
-# Componente practico Fase 4
+# Lista para almacenar clientes
+clientes = []
 
-# Se importa herramientas para crear clases abstractas
-from abc import ABC, abstractmethod
+# Lista para almacenar reservas
+reservas = []
 
-# Se mporta para trabajar con fechas (logs)
-from datetime import datetime
-
-# LOGS
-# Archivo de logs donde se registran errores y eventos guarda todo
-
-# Función que registra mensajes en un archivo de logs
-def registrar_log(mensaje):
-    # Abre o crea el archivo logs.txt en modo agregar
-    with open("logs.txt", "a") as archivo:
-        # Escribe fecha + mensaje
-        archivo.write(f"{datetime.now()} - {mensaje}\n")
+# Lista de servicios disponibles
+servicios = [
+    ServicioSala("Sala", 100),
+    ServicioEquipo("Equipo", 50),
+    ServicioAsesoria("Asesoria", 80)
+]
 
 
-# MANEJO DE ERRORES
+# Función del menú principal
+def menu():
 
-# Clase base de errores del sistema
-class ErrorSistema(Exception):
-    pass 
+    # Bucle infinito hasta salir
+    while True:
 
-# Clase específica para errores de validación
-class ErrorValidacion(ErrorSistema):
-    pass  
+        # Mostrar opciones
+        print("\n--- SISTEMA SOFTWARE FJ ---")
+        print("1. Registrar cliente")
+        print("2. Ver clientes")
+        print("3. Crear reserva")
+        print("4. Ver reservas")
+        print("5. Salir")
 
-# CLASE ABSTRACTA ENTIDAD
-# Clase abstracta que represente entidades generales del sistema
+        # Leer opción del usuario
+        opcion = input("Seleccione: ")
 
-class Entidad(ABC):
+        try:
 
-    # Constructor que recibe ID
-    def __init__(self, id):
-        self._id = id  # Atributo protegido (encapsulación)
+            # Registrar cliente
+            if opcion == "1":
+                nombre = input("Nombre: ")
+                correo = input("Correo: ")
 
-    # Método abstracto 
-    @abstractmethod
-    def mostrar_info(self):
-        pass
+                cliente = Cliente(len(clientes)+1, nombre, correo)
+                clientes.append(cliente)
+
+                print("Cliente registrado")
+
+            # Mostrar clientes
+            elif opcion == "2":
+                for c in clientes:
+                    print(c.mostrar_info())
+
+            # Crear reserva
+            elif opcion == "3":
+
+                if not clientes:
+                    print("No hay clientes")
+                    continue
+
+                print("Clientes:")
+                for c in clientes:
+                    print(c.mostrar_info())
+
+                try:
+                    id_cliente = int(input("Seleccione ID cliente: "))
+                    cliente = clientes[id_cliente - 1]
+                except:
+                    raise ErrorValidacion("Cliente inválido")
+
+                print("Servicios:")
+                for i, s in enumerate(servicios):
+                    print(i, s.nombre)
+
+                try:
+                    id_servicio = int(input("Seleccione servicio: "))
+                    servicio = servicios[id_servicio]
+                except:
+                    raise ErrorValidacion("Servicio inválido")
+
+                entrada = input("Duración (ej: 2 horas): ").strip().lower()
+
+                try:
+                    cantidad_str, unidad = entrada.split(maxsplit=1)
+                    cantidad = int(cantidad_str)
+                except:
+                    raise ErrorValidacion("Formato inválido. Ej: 2 horas")
+
+                unidad = unidad.replace(".", "").replace(",", "")
+
+                reserva = Reserva(cliente, servicio, (cantidad, unidad))
+                reserva.confirmar()
+                reservas.append(reserva)
+
+            # Mostrar reservas
+            elif opcion == "4":
+                for r in reservas:
+                    print(r.mostrar())
+
+            # Salir
+            elif opcion == "5":
+                print("Saliendo...")
+                break
+
+            # Opción inválida
+            else:
+                print("Opción inválida")
+
+        except Exception as e:
+            registrar_log(e)
+            print(f"Error en operación: {e}")
 
 
-# CLASE CLIENTE 
-# Clase Cliente con validaciones y encapsulación
-
-class Cliente(Entidad):
-
-    # Se define los datos basicos
-    def __init__(self, id, nombre, correo):
-        super().__init__(id) 
-        self.nombre = nombre 
-        self.correo = correo  
-
-    # Se crea un valor al nombre 
-    @property
-    def nombre(self):
-        return self._nombre
-
-    # se guarda nombre con validación 
-    @nombre.setter
-    def nombre(self, valor):
-        # Validación robusta
-        if not valor or len(valor) < 3:
-            raise ErrorValidacion("Nombre inválido")
-        self._nombre = valor
-
-    # se crea un valor al correo
-    @property
-    def correo(self):
-        return self._correo
-
-    # Se guarda el valor del correo con validación 
-    @correo.setter
-    def correo(self, valor):
-        if "@" not in valor:
-            raise ErrorValidacion("Correo inválido")
-        self._correo = valor
-
-    # Implementación del método abstracto
-    def mostrar_info(self):
-        return f"{self._id} - {self._nombre} - {self._correo}"
-
-# Clase abstracta Servicio
-class Servicio(ABC):
-
-    # Constructor del servicio
-    def __init__(self, nombre, precio_base):
-        self.nombre = nombre  # Nombre del servicio
-        self.precio_base = precio_base  # Precio base
-
-    # Método abstracto para calcular costo
-    @abstractmethod
-    def calcular_costo(self, *args):
-        pass
+# Punto de entrada del programa
+if __name__ == "__main__":
+    menu()
